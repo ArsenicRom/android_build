@@ -264,4 +264,4 @@ CORTEX_FLAGS := \
         -mcpu=cortex-a57.cortex-a53 \
         -mtune=cortex-a57.cortex-a53
 
-
+endif
