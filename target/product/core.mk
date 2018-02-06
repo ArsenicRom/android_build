@@ -36,6 +36,8 @@ PRODUCT_PACKAGES += \
     DownloadProviderUi \
     Email \
     ExactCalculator \
+    DuiBlackThemeOverlay \
+    DuiDarkThemeOverlay \
     ExternalStorageProvider \
     FusedLocation \
     InputDevices \
