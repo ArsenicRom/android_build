@@ -36,6 +36,8 @@ PRODUCT_PACKAGES += \
     DownloadProviderUi \
     Email \
     ExactCalculator \
+    DuiBlackThemeOverlay \
+    DuiDarkThemeOverlay \
     ExternalStorageProvider \
     FusedLocation \
     InputDevices \
@@ -52,6 +54,8 @@ PRODUCT_PACKAGES += \
     ProxyHandler \
     QuickSearchBox \
     Settings \
+    SettingsBlackThemeOverlay \
+    SettingsDarkThemeOverlay \
     SharedStorageBackup \
     StorageManager \
     Telecom \

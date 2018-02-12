@@ -34,7 +34,6 @@ unique_product_copy_files_destinations :=
 $(foreach cf,$(unique_product_copy_files_pairs), \
     $(eval _src := $(call word-colon,1,$(cf))) \
     $(eval _dest := $(call word-colon,2,$(cf))) \
-    $(call check-product-copy-files,$(cf)) \
     $(if $(filter $(unique_product_copy_files_destinations),$(_dest)), \
         $(info PRODUCT_COPY_FILES $(cf) ignored.), \
         $(eval _fulldest := $(call append-path,$(PRODUCT_OUT),$(_dest))) \
@@ -218,13 +217,13 @@ ifeq ($(TARGET_BUILD_VARIANT),user)
 
   # Dev. branches should have DISPLAY_BUILD_NUMBER set
   ifeq (true,$(DISPLAY_BUILD_NUMBER))
-    BUILD_DISPLAY_ID := $(BUILD_ID).$(BUILD_NUMBER_FROM_FILE) $(BUILD_KEYS)
+    BUILD_DISPLAY_ID := $(BUILD_ID)
   else
-    BUILD_DISPLAY_ID := $(BUILD_ID) $(BUILD_KEYS)
+    BUILD_DISPLAY_ID := $(BUILD_ID)
   endif
 else
   # Non-user builds should show detailed build information
-  BUILD_DISPLAY_ID := $(build_desc)
+  BUILD_DISPLAY_ID := $(BUILD_ID)
 endif
 
 # Accepts a whitespace separated list of product locales such as
@@ -322,7 +321,8 @@ endif
 		$(hide) echo >> $@; \
 		        echo "#" >> $@; \
 		        echo "# ADDITIONAL_BUILD_PROPERTIES" >> $@; \
-		        echo "#" >> $@; )
+		        echo "#" >> $@; \
+		        echo "# modversion this line enables Tasker root support" >> $@; )
 	$(hide) $(foreach line,$(FINAL_BUILD_PROPERTIES), \
 		echo "$(line)" >> $@;)
 	$(hide) cat $(INSTALLED_ANDROID_INFO_TXT_TARGET) | grep 'require version-' | sed -e 's/require version-/ro.build.expect./g' >> $@
@@ -351,55 +351,55 @@ endif
 # vendor build.prop
 #
 # For verifying that the vendor build is what we think it is
-ifdef BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE
-INSTALLED_VENDOR_BUILD_PROP_TARGET := $(TARGET_OUT_VENDOR)/build.prop
-ALL_DEFAULT_INSTALLED_MODULES += $(INSTALLED_VENDOR_BUILD_PROP_TARGET)
+# ifdef BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE
+# INSTALLED_VENDOR_BUILD_PROP_TARGET := $(TARGET_OUT_VENDOR)/build.prop
+# ALL_DEFAULT_INSTALLED_MODULES += $(INSTALLED_VENDOR_BUILD_PROP_TARGET)
 
-ifdef property_overrides_split_enabled
-FINAL_VENDOR_BUILD_PROPERTIES += \
-    $(call collapse-pairs, $(PRODUCT_PROPERTY_OVERRIDES))
-FINAL_VENDOR_BUILD_PROPERTIES := $(call uniq-pairs-by-first-component, \
-    $(FINAL_VENDOR_BUILD_PROPERTIES),=)
-endif  # property_overrides_split_enabled
-
-ifdef TARGET_VENDOR_PROP
-vendor_prop_file := $(TARGET_VENDOR_PROP)
-else
-vendor_prop_file := $(wildcard $(TARGET_DEVICE_DIR)/vendor.prop)
-endif
-$(INSTALLED_VENDOR_BUILD_PROP_TARGET): $(VENDOR_BUILDINFO_SH) $(intermediate_system_build_prop)
-	@echo Target vendor buildinfo: $@
-	@mkdir -p $(dir $@)
-	$(hide) echo > $@
-	$(hide) grep 'ro.product.first_api_level' $(intermediate_system_build_prop) >> $@ || true
-	$(hide) echo ro.vendor.build.date=`$(DATE_FROM_FILE)`>>$@
-	$(hide) echo ro.vendor.build.date.utc=`$(DATE_FROM_FILE) +%s`>>$@
-	$(hide) echo ro.vendor.build.fingerprint="$(BUILD_FINGERPRINT_FROM_FILE)">>$@
-ifdef property_overrides_split_enabled
-	$(hide) TARGET_DEVICE="$(TARGET_DEVICE)" \
-			PRODUCT_NAME="$(TARGET_PRODUCT)" \
-			PRODUCT_BRAND="$(PRODUCT_BRAND)" \
-			PRODUCT_MODEL="$(PRODUCT_MODEL)" \
-			PRODUCT_MANUFACTURER="$(PRODUCT_MANUFACTURER)" \
-			TARGET_BOOTLOADER_BOARD_NAME="$(TARGET_BOOTLOADER_BOARD_NAME)" \
-			TARGET_BOARD_PLATFORM="$(TARGET_BOARD_PLATFORM)" \
-	        bash $(VENDOR_BUILDINFO_SH) >> $@
-	$(hide) $(foreach file,$(vendor_prop_file), \
-		if [ -f "$(file)" ]; then \
-			echo "#" >> $@; \
-			echo Target buildinfo from: "$(file)"; \
-			echo "# from $(file)" >> $@; \
-			echo "#" >> $@; \
-			cat $(file) >> $@; \
-		fi;)
-	$(hide) echo "#" >> $@; \
-	        echo "# ADDITIONAL VENDOR BUILD PROPERTIES" >> $@; \
-	        echo "#" >> $@;
-	$(hide) $(foreach line,$(FINAL_VENDOR_BUILD_PROPERTIES), \
-		echo "$(line)" >> $@;)
-	$(hide) build/tools/post_process_props.py $@
-endif  # property_overrides_split_enabled
-endif  # BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE
+# ifdef property_overrides_split_enabled
+# FINAL_VENDOR_BUILD_PROPERTIES += \
+#     $(call collapse-pairs, $(PRODUCT_PROPERTY_OVERRIDES))
+# FINAL_VENDOR_BUILD_PROPERTIES := $(call uniq-pairs-by-first-component, \
+#     $(FINAL_VENDOR_BUILD_PROPERTIES),=)
+# endif  # property_overrides_split_enabled
+#
+# ifdef TARGET_VENDOR_PROP
+# vendor_prop_file := $(TARGET_VENDOR_PROP)
+# else
+# vendor_prop_file := $(wildcard $(TARGET_DEVICE_DIR)/vendor.prop)
+# endif
+# $(INSTALLED_VENDOR_BUILD_PROP_TARGET): $(VENDOR_BUILDINFO_SH) $(intermediate_system_build_prop)
+# 	@echo Target vendor buildinfo: $@
+# 	@mkdir -p $(dir $@)
+# 	$(hide) echo > $@
+# 	$(hide) grep 'ro.product.first_api_level' $(intermediate_system_build_prop) >> $@ || true
+# 	$(hide) echo ro.vendor.build.date=`$(DATE_FROM_FILE)`>>$@
+# 	$(hide) echo ro.vendor.build.date.utc=`$(DATE_FROM_FILE) +%s`>>$@
+# 	$(hide) echo ro.vendor.build.fingerprint="$(BUILD_FINGERPRINT_FROM_FILE)">>$@
+# ifdef property_overrides_split_enabled
+# 	$(hide) TARGET_DEVICE="$(TARGET_DEVICE)" \
+# 			PRODUCT_NAME="$(TARGET_PRODUCT)" \
+# 			PRODUCT_BRAND="$(PRODUCT_BRAND)" \
+# 			PRODUCT_MODEL="$(PRODUCT_MODEL)" \
+# 			PRODUCT_MANUFACTURER="$(PRODUCT_MANUFACTURER)" \
+# 			TARGET_BOOTLOADER_BOARD_NAME="$(TARGET_BOOTLOADER_BOARD_NAME)" \
+# 			TARGET_BOARD_PLATFORM="$(TARGET_BOARD_PLATFORM)" \
+# 	        bash $(VENDOR_BUILDINFO_SH) >> $@
+# 	$(hide) $(foreach file,$(vendor_prop_file), \
+# 		if [ -f "$(file)" ]; then \
+# 			echo "#" >> $@; \
+# 			echo Target buildinfo from: "$(file)"; \
+# 			echo "# from $(file)" >> $@; \
+# 			echo "#" >> $@; \
+# 			cat $(file) >> $@; \
+# 		fi;)
+# 	$(hide) echo "#" >> $@; \
+# 	        echo "# ADDITIONAL VENDOR BUILD PROPERTIES" >> $@; \
+# 	        echo "#" >> $@;
+# 	$(hide) $(foreach line,$(FINAL_VENDOR_BUILD_PROPERTIES), \
+# 		echo "$(line)" >> $@;)
+# 	$(hide) build/tools/post_process_props.py $@
+# endif  # property_overrides_split_enabled
+# endif  # BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE
 
 # ----------------------------------------------------------------
 
